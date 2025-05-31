@@ -26,6 +26,10 @@ const productSchema = new Schema<IProductModel>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true
+    },
+    isDeleted: {
+      type: Boolean,
+      required: true
     }
   },
   {

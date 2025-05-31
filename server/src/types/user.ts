@@ -32,6 +32,7 @@ export interface IProductModel extends Document {
   description: string;
   stock: number;
   price: number;
+  isDeleted: boolean;
 }
 
 export type ProductDTO = {
@@ -51,6 +52,7 @@ export interface SaleData {
   productId?: string
   customerId?: string;
   userId?: string;
+  isDeleted?: boolean;
 }
 
 export interface ISaleModel extends Document {
@@ -63,6 +65,7 @@ export interface ISaleModel extends Document {
   productId: mongoose.ObjectId;
   customerId: mongoose.ObjectId;
   userId: mongoose.ObjectId;
+  isDeleted: boolean;
 }
 
 export type SaleDTO = {
@@ -105,4 +108,84 @@ export interface SalesReportDTO {
   totalQuantity: number;
   topSellingProduct: string | null;
   uniqueCustomers: number;
+  sales: SaleDTO[];
+}
+
+export type ItemsReport = {
+  totalProducts: number;
+  totalStock: number;
+  totalInventoryValue: number;
+  lowStockCount: number;
+};
+
+export interface CustomerLedgerDTO {
+  customerId: string;
+  customerName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  totalPurchases: number;
+  totalAmount: number;
+  totalQuantity: number;
+  firstPurchase: Date;
+  lastPurchase: Date;
+  averageOrderValue: number;
+  transactions: TransactionDTO[];
+}
+
+export interface CustomerLedgerSummaryDTO {
+  totalCustomers: number;
+  totalRevenue: number;
+  totalTransactions: number;
+  averageCustomerValue: number;
+  topCustomer: string | null;
+}
+
+export interface CustomerLedgerReportDTO {
+  summary: CustomerLedgerSummaryDTO;
+  customers: CustomerLedgerDTO[];
+}
+
+export interface TransactionDTO {
+  productName: string;
+  quantity: number;
+  totalPrice: number;
+  saleDate: Date;
+  productId: string;
+}
+
+export interface CustomerLedgerEntity {
+  customerId: string;
+  customerName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  totalPurchases: number;
+  totalAmount: number;
+  totalQuantity: number;
+  firstPurchase: Date;
+  lastPurchase: Date;
+  averageOrderValue: number;
+  transactions: TransactionDTO[];
+}
+
+export enum ExportFormat {
+  PRINT = 'print',
+  EXCEL = 'excel',
+  PDF = 'pdf',
+  EMAIL = 'email',
+}
+
+export type ReportType = 'sales' | 'items' | 'customer-ledger';
+
+export interface ExportRequest {
+  reportType: ReportType;
+  format: ExportFormat;
+  fromDate?: string;
+  toDate?: string;
+  email?: string;
+}
+export interface ItemsReportExportData {
+  report: ItemsReport;
+  products: ProductDTO[];
 }

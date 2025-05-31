@@ -4,7 +4,7 @@ import ISaleService from "../interfaces/services/sale.service";
 import productRepository from "../repositories/product.repository";
 import saleRepsitory from "../repositories/sale.repsitory";
 import { PaginatedData, StatusCode } from "../types/type";
-import { SaleData, SaleDTO, SalesReportDTO } from "../types/user";
+import { CustomerLedgerDTO, CustomerLedgerReportDTO, ProductDTO, SaleData, SaleDTO, SalesReportDTO } from "../types/user";
 import { HttpError } from "../utils/http.error";
 
 
@@ -35,7 +35,8 @@ class SaleService implements ISaleService {
       saleDate: new Date(data.saleDate),
       userId: data.userId,
       productId: data.productId,
-      customerId: data.customerId
+      customerId: data.customerId,
+      isDeleted: false
     });
 
     return {
@@ -125,7 +126,7 @@ class SaleService implements ISaleService {
       throw new HttpError(StatusCode.NOT_FOUND, "Product not found.");
     }
 
-    const deleted = await this._saleRepository.delete(id);
+    const deleted = await this._saleRepository.update(id, { isDeleted: true });
     if (!deleted) {
       throw new HttpError(StatusCode.INTERNAL_SERVER_ERROR, "Failed to delete product.");
     }
@@ -140,7 +141,8 @@ class SaleService implements ISaleService {
         totalRevenue: 0,
         totalQuantity: 0,
         topSellingProduct: null,
-        uniqueCustomers: 0
+        uniqueCustomers: 0,
+        sales: []
       };
     }
 
@@ -149,11 +151,21 @@ class SaleService implements ISaleService {
     const productCount: Record<string, number> = {};
     const customerSet = new Set<string>();
 
-    sales.forEach(sale => {
+    const saleDTOs: SaleDTO[] = sales.map(sale => {
       totalRevenue += sale.totalPrice;
       totalQuantity += sale.quantity;
+
       productCount[sale.productName] = (productCount[sale.productName] || 0) + sale.quantity;
       customerSet.add(sale.customerId.toString());
+
+      return {
+        id: sale._id.toString(),
+        productName: sale.productName,
+        quantity: sale.quantity,
+        totalPrice: sale.totalPrice,
+        customerName: sale.customerName,
+        saleDate: sale.saleDate
+      };
     });
 
     const topSellingProduct = Object.entries(productCount).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
@@ -163,11 +175,30 @@ class SaleService implements ISaleService {
       totalRevenue,
       totalQuantity,
       topSellingProduct,
-      uniqueCustomers: customerSet.size
+      uniqueCustomers: customerSet.size,
+      sales: saleDTOs
     };
   }
 
+  async getCustomerLedgerReport(userId: string, from: Date, to: Date): Promise<CustomerLedgerReportDTO> {
+    const customerLedger = await this._saleRepository.getCustomerLedger(userId, from, to);
 
+    const summary = {
+      totalCustomers: customerLedger.length,
+      totalRevenue: customerLedger.reduce((sum, c) => sum + c.totalAmount, 0),
+      totalTransactions: customerLedger.reduce((sum, c) => sum + c.totalPurchases, 0),
+      averageCustomerValue:
+        customerLedger.length > 0
+          ? customerLedger.reduce((sum, c) => sum + c.totalAmount, 0) / customerLedger.length
+          : 0,
+      topCustomer: customerLedger.length > 0 ? customerLedger[0].customerName : null,
+    };
+
+    return {
+      summary,
+      customers: customerLedger,
+    };
+  }
 }
 
 export default new SaleService(saleRepsitory, productRepository);

@@ -40,6 +40,10 @@ const saleSchema = new Schema<ISaleModel>({
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
+  },
+  isDeleted: {
+    type: Boolean,
+    required: true
   }
 }, {
   timestamps: true

@@ -1,5 +1,5 @@
 import { PaginatedData } from "../../types/type";
-import { SaleData, SaleDTO, SalesReportDTO } from "../../types/user";
+import { CustomerLedgerReportDTO, SaleData, SaleDTO, SalesReportDTO } from "../../types/user";
 
 
 export default interface ISaleService {
@@ -8,4 +8,5 @@ export default interface ISaleService {
   getSales(page: number, limit: number, search: string): Promise<PaginatedData<SaleDTO>>;
   deleteSale(id: string): Promise<void>;
   getSalesReport(userId: string, from: Date, to: Date): Promise<SalesReportDTO>
+  getCustomerLedgerReport(userId: string, from: Date, to: Date): Promise<CustomerLedgerReportDTO>
 }

@@ -23,3 +23,13 @@ export interface AuthenticatedRequest extends Request {
     userId: string;
   };
 }
+
+
+export interface EmailConfig {
+  user: string;
+  pass: string;
+  host?: string;
+  port?: number;
+  secure?: boolean;
+}
+

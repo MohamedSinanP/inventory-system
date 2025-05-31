@@ -141,7 +141,7 @@ export const editCustomer = async (id: string, data: CustomerFormData) => {
     const response = await api.put(`/user/customer/${id}`, data);
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || error.message || "Customer storing failed.");
+    throw new Error(error.response?.data?.message || error.message || "Customer editing failed.");
   }
 }
 export const getCustomers = async (page: number, limit: number, search: string) => {
@@ -155,7 +155,7 @@ export const getCustomers = async (page: number, limit: number, search: string) 
     });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || error.message || "Customer storing failed.");
+    throw new Error(error.response?.data?.message || error.message || "Customer fetching failed.");
   }
 }
 export const getAllCustomers = async () => {
@@ -163,7 +163,7 @@ export const getAllCustomers = async () => {
     const response = await api.get('/user/all-customer');
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || error.message || "Customer storing failed.");
+    throw new Error(error.response?.data?.message || error.message || "Customer fetching failed.");
   }
 }
 export const getSalesReport = async (from: string, to: string) => {
@@ -174,5 +174,62 @@ export const getSalesReport = async (from: string, to: string) => {
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || error.message || "Sales report fetch failed.");
+  }
+};
+export const getItemsReport = async () => {
+  try {
+    const response = await api.get('/user/products-report');
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || error.message || "Items report fetch failed.");
+  }
+};
+
+export const getCustomerLedger = async (from: string, to: string) => {
+  try {
+    const response = await api.get('/user/customer-ledger', {
+      params: { from, to }
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || error.message || "Customer ledger fetch failed.");
+  }
+};
+
+export const exportReport = async (
+  reportType: 'sales' | 'items' | 'customer-ledger',
+  format: 'print' | 'excel' | 'pdf' | 'email',
+  fromDate?: string,
+  toDate?: string,
+  email?: string
+) => {
+  try {
+    const params = new URLSearchParams({
+      reportType,
+      format,
+      ...(fromDate && { fromDate }),
+      ...(toDate && { toDate }),
+      ...(email && { email })
+    });
+
+    if (format === 'email') {
+      const response = await api.get('/user/export', {
+        params: params
+      });
+      return response.data;
+    }
+
+    const response = await api.get('/user/export', {
+      params: params,
+      responseType: 'arraybuffer'
+    });
+
+    return {
+      content: response.data,
+      status: response.status,
+      headers: response.headers
+    };
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || error.message || "Report exportation failed.");
   }
 };

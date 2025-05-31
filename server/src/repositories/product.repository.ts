@@ -21,6 +21,7 @@ class ProductRepository extends BaseRepository<IProductModel> implements IProduc
 
     const query: any = {
       userId: new Types.ObjectId(userId),
+      isDeleted: false
     };
 
     if (search) {

@@ -6,4 +6,5 @@ export default interface IProductController {
   editProduct(req: Request, res: Response, next: NextFunction): Promise<void>;
   deleteProduct(req: Request, res: Response, next: NextFunction): Promise<void>;
   getProducts(req: Request, res: Response, next: NextFunction): Promise<void>;
+  getItemsReport(req: Request, res: Response, next: NextFunction): Promise<void>;
 }

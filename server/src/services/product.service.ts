@@ -1,7 +1,7 @@
 import IProductRepository from "../interfaces/repositories/product.repository";
 import IProductService from "../interfaces/services/product.service";
 import productRepository from "../repositories/product.repository";
-import { Product, ProductDTO } from "../types/user";
+import { ItemsReport, Product, ProductDTO } from "../types/user";
 import { HttpError } from "../utils/http.error";
 import { PaginatedData, StatusCode } from "../types/type";
 
@@ -18,7 +18,11 @@ class ProductService implements IProductService {
     if (existingProduct) {
       throw new HttpError(StatusCode.BAD_REQUEST, "This product already exist.");
     }
-    const newProduct = await this._productRepository.addProduct(data);
+    const productData = {
+      ...data,
+      isDeleted: false
+    }
+    const newProduct = await this._productRepository.addProduct(productData);
     if (!newProduct) {
       throw new HttpError(StatusCode.INTERNAL_SERVER_ERROR, "Failed to create product.");
     }
@@ -78,7 +82,7 @@ class ProductService implements IProductService {
       throw new HttpError(StatusCode.NOT_FOUND, "Product not found.");
     }
 
-    const deleted = await this._productRepository.delete(id);
+    const deleted = await this._productRepository.update(id, { isDeleted: true });
     if (!deleted) {
       throw new HttpError(StatusCode.INTERNAL_SERVER_ERROR, "Failed to delete product.");
     }
@@ -118,6 +122,27 @@ class ProductService implements IProductService {
     } else {
       return null;
     }
+  }
+
+  async getItemsReport(userId: string): Promise<ItemsReport> {
+    const products = await this._productRepository.findAll({ userId });
+    const totalProducts = products.length;
+    let totalStock = 0;
+    let totalInventoryValue = 0;
+    let lowStockCount = 0;
+
+    products.forEach(product => {
+      totalStock += product.stock;
+      totalInventoryValue += product.stock * product.price;
+      if (product.stock < 5) lowStockCount++;
+    });
+
+    return {
+      totalProducts,
+      totalStock,
+      totalInventoryValue,
+      lowStockCount,
+    };
   }
 
 }

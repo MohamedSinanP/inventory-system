@@ -63,6 +63,17 @@ class ProductController implements IProductController {
       next(error);
     }
   }
+
+  async getItemsReport(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId } = (req as AuthenticatedRequest).user;
+      const products = await this._productService.getItemsReport(userId);
+      res.status(StatusCode.OK).json(HttpResponse.success(products));
+    } catch (error) {
+      next(error);
+    }
+  }
+
 }
 
 export default new ProductController(productService);

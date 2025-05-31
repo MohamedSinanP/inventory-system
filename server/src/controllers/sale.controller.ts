@@ -76,9 +76,21 @@ class SaleController implements ISaleController {
       const { userId } = (req as AuthenticatedRequest).user;
       const from = new Date(req.query.from as string);
       const to = new Date(req.query.to as string);
-
       const reportData = await this._saleSerive.getSalesReport(userId, from, to);
       res.status(StatusCode.OK).json(HttpResponse.success(reportData));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getCustomerLedger(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId } = (req as AuthenticatedRequest).user;
+      const from = new Date(req.query.from as string);
+      const to = new Date(req.query.to as string);
+
+      const report = await this._saleSerive.getCustomerLedgerReport(userId, from, to);
+      res.status(StatusCode.OK).json(HttpResponse.success(report));
     } catch (error) {
       next(error);
     }

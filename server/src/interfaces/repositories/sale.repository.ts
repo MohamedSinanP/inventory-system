@@ -1,5 +1,5 @@
 import IBaseRepository from "./base.repository";
-import { ISaleModel, SaleData, } from "../../types/user";
+import { CustomerLedgerEntity, ISaleModel, SaleData, } from "../../types/user";
 
 export default interface ISaleRepository extends IBaseRepository<ISaleModel> {
   findPaginated(page: number,
@@ -10,4 +10,5 @@ export default interface ISaleRepository extends IBaseRepository<ISaleModel> {
   }>
   addNewSale(data: SaleData): Promise<ISaleModel>
   findByDateRange(userId: string, from: Date, to: Date): Promise<ISaleModel[]>
+  getCustomerLedger(userId: string, fromDate: Date, toDate: Date): Promise<CustomerLedgerEntity[]>
 };
